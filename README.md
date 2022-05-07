@@ -1,5 +1,5 @@
 <div align="center">
 
-![image](https://itazuraneko.neocities.org/background/itazuranekoanimated.png)
+![image](https://files.catbox.moe/64c8p9.png)
 
 </div>
