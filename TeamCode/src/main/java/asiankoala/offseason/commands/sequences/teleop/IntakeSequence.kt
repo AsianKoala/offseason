@@ -31,12 +31,12 @@ class IntakeSequence(strategy: () -> Strategy, intake: Intake, outtake: Outtake,
         InstantCmd({
             val strat = strategy.invoke()
             val angle = strat.getTurretAngle()
-            turret.motor.setPIDTarget(angle)
+            turret.motor.setTarget(angle)
         }, turret).alongWith(
                 IntakeCommands.IntakeTurnOffCommand(intake),
                 ChooseCmd(
                             InstantCmd({
-                                slides.motor.followMotionProfile(strategy.invoke().getSlideInches())
+                                slides.motor.setTarget(strategy.invoke().getSlideInches())
                             }),
                         InstantCmd({})
                 ) {

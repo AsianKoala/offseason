@@ -3,12 +3,10 @@ package asiankoala.offseason
 import asiankoala.offseason.subsystems.Arm
 import asiankoala.offseason.subsystems.Indexer
 import asiankoala.offseason.subsystems.Outtake
-import com.asiankoala.koawalib.control.FeedforwardConstants
-import com.asiankoala.koawalib.control.MotorControlType
-import com.asiankoala.koawalib.control.PIDConstants
+import com.asiankoala.koawalib.control.motion.MotionConstraints
 import com.asiankoala.koawalib.hardware.motor.KMotor
 import com.asiankoala.koawalib.hardware.motor.KMotorEx
-import com.asiankoala.koawalib.hardware.motor.KMotorExConfig
+import com.asiankoala.koawalib.hardware.motor.KMotorExSettings
 import com.asiankoala.koawalib.hardware.sensor.KDistanceSensor
 import com.asiankoala.koawalib.hardware.servo.KServo
 
@@ -19,41 +17,47 @@ class Hardware {
     val frMotor = KMotor("fr").brake
     val intakeMotor = KMotor("intake").reverse
     val turretMotor = KMotorEx(
-        KMotorExConfig(
+        KMotorExSettings(
             "turret",
             5.33333,
             false,
-            MotorControlType.POSITION_PID,
-            PIDConstants(
-                0.05,
-//                0.035,
-                0.0007
-            ),
-            FeedforwardConstants(
-                kStatic = 0.01
-            ),
-            positionEpsilon = 1.0,
-
+            1.0,
+            0.05,
+            0.0,
+            0.0007,
+            0.01,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            isMotionProfiled = false,
+            isPIDEnabled = true,
+            isFFEnabled = true
         )
     ).brake as KMotorEx
 
     val slideMotor = KMotorEx(
-        KMotorExConfig(
+        KMotorExSettings(
             "slides",
             20.8333,
             false,
-            controlType = MotorControlType.MOTION_PROFILE,
-            pid = PIDConstants(
-                kP = 0.23,
-                kD = 0.007,
+            1.5,
+            0.23,
+            0.0,
+            0.007,
+            0.01,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            MotionConstraints(
+                180.0,
+                180.0
             ),
-            ff = FeedforwardConstants(
-                kStatic = 0.01
-            ),
-            maxVelocity = 180.0,
-            maxAcceleration = 180.0,
-            positionEpsilon = 1.5,
-            homePositionToDisable = 0.0,
+            disabledPosition = 0.0,
+            isMotionProfiled = true,
+            isPIDEnabled = true,
+            isFFEnabled = true
         )
     ).float.reverse as KMotorEx
 

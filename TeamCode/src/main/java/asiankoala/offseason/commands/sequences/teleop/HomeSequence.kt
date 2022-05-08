@@ -17,10 +17,10 @@ class HomeSequence(turret: Turret, slides: Slides, outtake: Outtake, indexer: In
                 IntakeCommands.IntakeTurnOffCommand(intake)
         ),
         WaitCmd(0.2),
-        InstantCmd({slides.motor.followMotionProfile(Slides.slideHomeValue)}),
+        InstantCmd({slides.motor.setTarget(Slides.slideHomeValue)}),
         WaitCmd(0.5),
-        InstantCmd({turret.motor.setPIDTarget(Turret.homeAngle)}),
-        WaitUntilCmd { slides.motor.isAtTarget && turret.motor.isAtTarget},
+        InstantCmd({turret.motor.setTarget(Turret.homeAngle)}),
+        WaitUntilCmd { slides.motor.isAtTarget() && turret.motor.isAtTarget() },
         OuttakeCommands.OuttakeHomeCommand(outtake),
         IndexerCommands.IndexerOpenCommand(indexer)
 )

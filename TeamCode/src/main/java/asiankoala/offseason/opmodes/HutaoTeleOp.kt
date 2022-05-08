@@ -7,14 +7,19 @@ import asiankoala.offseason.commands.sequences.teleop.DepositSequence
 import asiankoala.offseason.commands.sequences.teleop.HomeSequence
 import asiankoala.offseason.commands.sequences.teleop.IntakeSequence
 import asiankoala.offseason.subsystems.Slides
-import asiankoala.offseason.subsystems.Turret
+import com.acmerobotics.roadrunner.geometry.Pose2d
+import com.acmerobotics.roadrunner.geometry.Vector2d
+import com.acmerobotics.roadrunner.path.PathBuilder
 import com.asiankoala.koawalib.command.KOpMode
 import com.asiankoala.koawalib.command.KScheduler
+import com.asiankoala.koawalib.command.commands.GVFCmd
 import com.asiankoala.koawalib.command.commands.InstantCmd
 import com.asiankoala.koawalib.command.commands.MecanumCmd
 import com.asiankoala.koawalib.command.group.SequentialGroup
 import com.asiankoala.koawalib.logger.Logger
 import com.asiankoala.koawalib.logger.LoggerConfig
+import com.asiankoala.koawalib.math.Pose
+import com.asiankoala.koawalib.math.radians
 import com.asiankoala.koawalib.util.Alliance
 
 open class HutaoTeleOp(private val alliance: Alliance) : KOpMode() {
@@ -22,21 +27,21 @@ open class HutaoTeleOp(private val alliance: Alliance) : KOpMode() {
     private val strategy = Strategy(alliance)
 
     override fun mInit() {
-//        hutao = Hutao(Pose(heading = 90.0.radians))
-//        driver.rightTrigger.onPress(GVFCommand(
-//                hutao.drive,
-//                PathBuilder(Pose2d(heading = 90.0.radians))
-//                        .splineTo(Vector2d(24.0, 24.0), 90.0.radians)
-//                        .build(),
-//                1.0,
-//                0.5,
-//                6.0,
-//                1.5
-//        ))
-//        bindDrive()
-//        bindDuck()
-//        bindCycling()
-//        bindStrategy()
+        hutao = Hutao(Pose(heading = 90.0.radians))
+        driver.rightTrigger.onPress(GVFCmd(
+                hutao.drive,
+                PathBuilder(Pose2d(heading = 90.0.radians))
+                        .splineTo(Vector2d(24.0, 24.0), 90.0.radians)
+                        .build(),
+                1.0,
+                0.5,
+                6.0,
+                1.5
+        ))
+        bindDrive()
+        bindDuck()
+        bindCycling()
+        bindStrategy()
 
 
         Logger.config = LoggerConfig(
@@ -48,12 +53,6 @@ open class HutaoTeleOp(private val alliance: Alliance) : KOpMode() {
                 maxErrorCount = 1,
                 maxWarningCount = 1
         )
-
-        hutao.complexTurret.motor.isPIDEnabled = true
-        hutao.complexTurret.motor.isFFEnabled = false
-        hutao.complexTurret.motor.isUsingVoltageFF = false
-        hutao.complexTurret.motor.encoder.zero(Turret.zeroAngle)
-        hutao.complexTurret.motor.setTarget(Turret.zeroAngle)
     }
 
     private fun bindDrive() {
@@ -92,18 +91,29 @@ open class HutaoTeleOp(private val alliance: Alliance) : KOpMode() {
         driver.b.onPress(InstantCmd( { strategy.strat = Strats.SHARED_RED }))
         driver.y.onPress(InstantCmd({
             Slides.movingShared += 1.0
-            hutao.slides.motor.followMotionProfile(Slides.movingShared)
+            hutao.slides.motor.setTarget(Slides.movingShared)
         }))
 
         driver.a.onPress(InstantCmd({
             Slides.movingShared -= 1.0
-            hutao.slides.motor.followMotionProfile(Slides.movingShared)
+            hutao.slides.motor.setTarget(Slides.movingShared)
         }))
     }
 
+    private fun hutaoPeriodic() {
+        hutao.run {
+            log()
+            slides.motor.update()
+            turret.motor.update()
+        }
+    }
+
+    override fun mInitLoop() {
+        hutaoPeriodic()
+    }
+
     override fun mLoop() {
-        hutao.log()
-        hutao.complexTurret.motor.update()
+        hutaoPeriodic()
     }
 }
 

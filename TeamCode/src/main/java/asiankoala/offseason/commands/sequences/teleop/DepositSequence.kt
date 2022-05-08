@@ -11,7 +11,7 @@ class DepositSequence(strategy: () -> Strategy, slides: Slides, indexer: Indexer
         ChooseCmd(
                 InstantCmd({}),
                 InstantCmd({
-                    slides.motor.followMotionProfile(strategy.invoke().getSlideInches())
+                    slides.motor.setTarget(strategy.invoke().getSlideInches())
                 }, slides)
         ) {
           false
