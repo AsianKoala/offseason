@@ -47,7 +47,6 @@ open class HutaoTeleOp(private val alliance: Alliance) : KOpMode() {
         Logger.config = LoggerConfig(
                 isLogging = true,
                 isPrinting = false,
-                isLoggingTelemetry = false,
                 isDebugging = false,
                 isDashboardEnabled = false,
                 maxErrorCount = 1,

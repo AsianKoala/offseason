@@ -4,9 +4,7 @@ import asiankoala.offseason.subsystems.Arm
 import asiankoala.offseason.subsystems.Indexer
 import asiankoala.offseason.subsystems.Outtake
 import com.asiankoala.koawalib.control.motion.MotionConstraints
-import com.asiankoala.koawalib.hardware.motor.KMotor
-import com.asiankoala.koawalib.hardware.motor.KMotorEx
-import com.asiankoala.koawalib.hardware.motor.KMotorExSettings
+import com.asiankoala.koawalib.hardware.motor.*
 import com.asiankoala.koawalib.hardware.sensor.KDistanceSensor
 import com.asiankoala.koawalib.hardware.servo.KServo
 
@@ -16,23 +14,23 @@ class Hardware {
     val brMotor = KMotor("br").brake
     val frMotor = KMotor("fr").brake
     val intakeMotor = KMotor("intake").reverse
+
     val turretMotor = KMotorEx(
         KMotorExSettings(
             "turret",
             5.33333,
             false,
             1.0,
-            0.05,
-            0.0,
-            0.0007,
-            0.01,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
             isMotionProfiled = false,
-            isPIDEnabled = true,
-            isFFEnabled = true
+            isVoltageCorrected = false,
+            PIDSettings(
+                0.05,
+                0.0,
+                0.0007
+            ),
+            FFSettings(
+                kS = 0.01,
+            ),
         )
     ).brake as KMotorEx
 
@@ -42,22 +40,24 @@ class Hardware {
             20.8333,
             false,
             1.5,
-            0.23,
-            0.0,
-            0.007,
-            0.01,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
+            isMotionProfiled = true,
+            isVoltageCorrected = false,
+
+            PIDSettings(
+                0.23,
+                0.0,
+                0.007,
+            ),
+            FFSettings(
+                kS = 0.01
+            ),
+
             MotionConstraints(
                 180.0,
                 180.0
             ),
-            disabledPosition = 0.0,
-            isMotionProfiled = true,
-            isPIDEnabled = true,
-            isFFEnabled = true
+
+            0.0,
         )
     ).float.reverse as KMotorEx
 
