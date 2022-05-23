@@ -1,8 +1,6 @@
-package asiankoala.offseason
+package asiankoala.ftc2021
 
 import asiankoala.offseason.subsystems.*
-import asiankoala.reiko.Encoders
-import asiankoala.reiko.Hardware
 import com.asiankoala.koawalib.logger.Logger
 import com.asiankoala.koawalib.math.Pose
 import com.asiankoala.koawalib.subsystem.drive.KMecanumOdoDrive

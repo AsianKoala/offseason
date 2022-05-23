@@ -1,13 +1,11 @@
-package asiankoala.offseason
+package asiankoala.reiko
 
 import asiankoala.offseason.subsystems.*
-import asiankoala.reiko.Encoders
-import asiankoala.reiko.Hardware
 import com.asiankoala.koawalib.logger.Logger
 import com.asiankoala.koawalib.math.Pose
 import com.asiankoala.koawalib.subsystem.drive.KMecanumOdoDrive
 
-class Hutao(startPose: Pose) {
+class Reiko(startPose: Pose) {
     private val hardware = Hardware()
     val encoders = Encoders(hardware)
 

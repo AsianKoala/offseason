@@ -1,4 +1,4 @@
-package asiankoala.offseason
+package asiankoala.reiko
 
 enum class Strats {
     ALLIANCE_BLUE,
