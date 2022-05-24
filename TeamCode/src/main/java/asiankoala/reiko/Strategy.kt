@@ -1,9 +1,9 @@
 package asiankoala.reiko
 
-import asiankoala.offseason.subsystems.Arm
-import asiankoala.offseason.subsystems.Outtake
-import asiankoala.offseason.subsystems.Slides
-import asiankoala.offseason.subsystems.Turret
+import asiankoala.reiko.subsystems.Arm
+import asiankoala.reiko.subsystems.Outtake
+import asiankoala.reiko.subsystems.Slides
+import asiankoala.reiko.subsystems.Turret
 import com.asiankoala.koawalib.logger.Logger
 import com.asiankoala.koawalib.util.Alliance
 
@@ -40,9 +40,9 @@ class Strategy(val alliance: Alliance = Alliance.BLUE) {
     }
     
     fun getSlideInches(): Double {
-        return when {
-            strat == Strats.ALLIANCE_BLUE -> Slides.blueDepositInches
-            strat == Strats.ALLIANCE_RED -> Slides.redDepositInches
+        return when (strat) {
+            Strats.ALLIANCE_BLUE -> Slides.blueDepositInches
+            Strats.ALLIANCE_RED -> Slides.redDepositInches
             else -> Slides.movingShared
         }
     }

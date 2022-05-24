@@ -1,15 +1,15 @@
 package asiankoala.reiko
 
-import asiankoala.offseason.subsystems.*
+import asiankoala.reiko.subsystems.*
 import com.asiankoala.koawalib.logger.Logger
 import com.asiankoala.koawalib.math.Pose
 import com.asiankoala.koawalib.subsystem.drive.KMecanumOdoDrive
 
 class Reiko(startPose: Pose) {
     private val hardware = Hardware()
-    val encoders = Encoders(hardware)
+    private val odometry = Odometry(hardware)
 
-    val drive = KMecanumOdoDrive(hardware.flMotor, hardware.blMotor, hardware.brMotor, hardware.frMotor, encoders.odo, true)
+    val drive = KMecanumOdoDrive(hardware.flMotor, hardware.blMotor, hardware.brMotor, hardware.frMotor, odometry.odo, true)
     val intake = Intake(hardware.intakeMotor, hardware.distanceSensor)
     val arm = Arm(hardware.armServo)
     val indexer = Indexer(hardware.indexerServo)
@@ -19,17 +19,14 @@ class Reiko(startPose: Pose) {
     val slides = Slides(hardware.slideMotor)
 
     fun log() {
-        Logger.addTelemetryData("power", drive.powers.rawString())
         Logger.addTelemetryData("position", drive.pose)
-        Logger.addTelemetryData("turret angle", turret.motor.encoder.pos)
-        Logger.addTelemetryData("slides inches", slides.motor.encoder.pos)
+        Logger.addTelemetryData("turret angle", turret.motor.pos)
+        Logger.addTelemetryData("slides inches", slides.motor.pos)
     }
 
     init {
         drive.setStartPose(startPose)
-        slides.motor.encoder.zero()
-        turret.motor.encoder.zero(Turret.zeroAngle)
-        slides.motor.setTarget(0.0)
-        turret.motor.setTarget(Turret.homeAngle)
+        slides.motor.setProfileTarget(0.0)
+        turret.motor.setTargetPosition(Turret.homeAngle)
     }
 }

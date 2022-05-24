@@ -1,9 +1,13 @@
 package asiankoala.reiko
 
-import asiankoala.offseason.subsystems.Arm
-import asiankoala.offseason.subsystems.Indexer
-import asiankoala.offseason.subsystems.Outtake
-import com.asiankoala.koawalib.control.motion.MotionConstraints
+import asiankoala.reiko.subsystems.Arm
+import asiankoala.reiko.subsystems.Indexer
+import asiankoala.reiko.subsystems.Outtake
+import asiankoala.reiko.subsystems.Turret
+import com.asiankoala.koawalib.control.controller.PIDGains
+import com.asiankoala.koawalib.control.motor.DisabledPosition
+import com.asiankoala.koawalib.control.motor.FFGains
+import com.asiankoala.koawalib.control.profile.MotionConstraints
 import com.asiankoala.koawalib.hardware.motor.*
 import com.asiankoala.koawalib.hardware.sensor.KDistanceSensor
 import com.asiankoala.koawalib.hardware.servo.KServo
@@ -15,51 +19,28 @@ class Hardware {
     val frMotor = KMotor("fr").brake
     val intakeMotor = KMotor("intake").reverse
 
-    val turretMotor = KMotorEx(
-        KMotorExSettings(
-            "turret",
-            5.33333,
-            false,
-            1.0,
-            isMotionProfiled = false,
-            isVoltageCorrected = false,
-            PIDSettings(
-                0.05,
-                0.0,
-                0.0007
-            ),
-            FFSettings(
-                kS = 0.01,
-            ),
-        )
-    ).brake as KMotorEx
+    val turretMotor = KMotor("turret")
+            .brake
+            .withPositionControl(
+                    5.3333,
+                    false,
+                    PIDGains(0.05, 0.0, 0.0007),
+                    FFGains(kS = 0.01),
+                    allowedPositionError = 1.0
+            )
+            .zero(Turret.zeroAngle)
 
-    val slideMotor = KMotorEx(
-        KMotorExSettings(
-            "slides",
-            20.8333,
-            false,
-            1.5,
-            isMotionProfiled = true,
-            isVoltageCorrected = false,
-
-            PIDSettings(
-                0.23,
-                0.0,
-                0.007,
-            ),
-            FFSettings(
-                kS = 0.01
-            ),
-
-            MotionConstraints(
-                180.0,
-                180.0
-            ),
-
-            0.0,
-        )
-    ).float.reverse as KMotorEx
+    val slideMotor = KMotor("slides")
+            .float
+            .reverse
+            .withMotionProfileControl(
+                    PIDGains(0.23, 0.0, 0.007),
+                    FFGains(kS = 0.01),
+                    MotionConstraints(180.0, 180.0),
+                    allowedPositionError = 1.5,
+                    disabledPosition = DisabledPosition(0.0, 1.5)
+            )
+            .zero(0.0)
 
     val duckMotor = KMotor("duckSpinner").brake
 
