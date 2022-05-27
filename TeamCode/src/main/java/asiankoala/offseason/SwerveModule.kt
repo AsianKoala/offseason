@@ -6,58 +6,78 @@ import com.asiankoala.koawalib.control.controller.ProfiledPIDController
 import com.asiankoala.koawalib.control.motor.FFGains
 import com.asiankoala.koawalib.control.profile.MotionConstraints
 import com.asiankoala.koawalib.hardware.motor.KMotor
-import com.asiankoala.koawalib.math.Vector
 import com.asiankoala.koawalib.subsystem.DeviceSubsystem
 import kotlin.math.PI
 
 class SwerveModule(
-        private val motor1: KMotor,
-        private val motor2: KMotor,
+        private val leftMotor: KMotor,
+        private val rightMotor: KMotor,
         private val startingAngle: Double
 ) : DeviceSubsystem() {
     companion object {
         private const val kCountsPerRev = 1.0
         private const val kGearRatio = 1.0
-        private val kAngleConstant = (2 * PI) / (kCountsPerRev * kGearRatio)
-        val velocityPID = PIDGains(0.0, 0.0, 0.0)
+        private const val kAngleConstant = (2 * PI) / (kCountsPerRev * kGearRatio)
+        private const val kRadius = 1.0
 
-        const val kV = 0.0
-
-        val turningPID = PIDGains(0.0, 0.0, 0.0)
-        val turningFF = FFGains()
-        val turningConstraints = MotionConstraints(60.0, 60.0)
+        private const val kV = 0.0
+        private val velocityPID = PIDGains(0.0, 0.0, 0.0)
+        private val turningPID = PIDGains(0.0, 0.0, 0.0)
+        private val turningFF = FFGains()
+        private val turningConstraints = MotionConstraints(60.0, 60.0)
     }
 
-    private val velocityController = PIDFController(velocityPID.coeffs)
-    private val turningController = ProfiledPIDController(turningPID, turningFF, turningConstraints)
+    private var _state = ModuleState(0.0, startingAngle)
+    private var _target = ModuleState(0.0, startingAngle)
 
-    private val moduleState = SwerveState(0.0, startingAngle, 0.0)
-    private val targetState = SwerveState(0.0, startingAngle, 0.0)
-    private var motor1Vector = Vector()
-    private var motor2Vector = Vector()
+    private val wheelVelController = PIDFController(velocityPID.coeffs)
+    private val azimuthAngleController = ProfiledPIDController(turningPID, turningFF, turningConstraints)
 
-    fun updateModuleState() {
-        val avg = (motor1.pos + motor2.pos) / 2
-        moduleState.angle = avg * kAngleConstant
+    private var _lastWheelVelControllerOutput = 0.0
+    private var _lastAzimuthAngleControllerOutput = 0.0
+
+    private var _azimuthVel = 0.0
+
+    private fun updateWheelVel() {
+        _state.wheelVel = ((leftMotor.vel - rightMotor.vel) / 2) * kAngleConstant
     }
 
-    fun setModuleVelocity(vel: Double) {
-        velocityController.targetPosition = vel
-        targetState.v = vel
+    private fun updateAzimuthAngle() {
+        _state.azimuthAngle = ((leftMotor.pos + rightMotor.pos) / 2) * kAngleConstant + startingAngle
     }
 
-    fun setModuleAngle(targetAngle: Double) {
-        turningController.setTarget(moduleState.angle, targetAngle)
-        targetState.angle = targetAngle
+    private fun updateAzimuthOmega() {
+        _azimuthVel = ((leftMotor.vel + rightMotor.vel) / 2) * kAngleConstant
+    }
+
+    private fun updateModuleState() {
+        updateAzimuthAngle()
+        updateAzimuthOmega()
+        updateWheelVel()
+    }
+
+    private fun updateWheelVelController() {
+        _lastWheelVelControllerOutput = wheelVelController.update(_state.wheelVel) + kV * _target.wheelVel
+    }
+
+    private fun updateAzimuthAngleController() {
+        _lastAzimuthAngleControllerOutput = azimuthAngleController.update(_state.azimuthAngle, _azimuthVel)
+    }
+
+    fun setTargetModuleState(target: ModuleState) {
+        _target = ModuleState.optimizeTarget(_state, target)
+        wheelVelController.targetPosition = _target.wheelVel
+        azimuthAngleController.setTarget(_state.azimuthAngle, _target.azimuthAngle)
     }
 
     fun update() {
-        val velocityOutput = velocityController.update(moduleState.v) + kV * targetState.v
-        val turningOutput = turningController.update(moduleState.angle, moduleState.v)
+        updateModuleState()
+        updateWheelVelController()
+        updateAzimuthAngle()
     }
 
     init {
-        motor1.zero(0.0)
-        motor2.zero(0.0)
+        leftMotor.zero(0.0)
+        rightMotor.zero(0.0)
     }
 }
